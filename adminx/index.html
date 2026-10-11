@@ -3,219 +3,430 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>adminx — Meta_EXE Admin</title>
+<title>adminx — Developer X admin panel</title>
 <style>
   :root{--bg:#0a0d1a;--card:#141a2e;--line:#273048;--tx:#eaeefb;--mu:#98a3c2;--acc:#8b6bff;
         --ok:#22c55e;--bad:#f87171;--warn:#fbbf24}
-  *{box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
-  body{margin:0;background:var(--bg);color:var(--tx);padding:18px}
-  .wrap{max-width:880px;margin:0 auto}
-  h1{font-size:20px;margin:0 0 2px}
-  .sub{color:var(--mu);font-size:12.5px;margin:0 0 16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
-  h2{font-size:13.5px;margin:0 0 10px;color:var(--acc);letter-spacing:.3px}
-  label{display:block;font-size:12px;color:var(--mu);margin:8px 0 5px;font-weight:600}
+  *{box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+  body{margin:0;background:radial-gradient(900px 500px at 50% -10%,#1b1f3d 0%,var(--bg) 65%);
+       color:var(--tx);padding:18px;min-height:100vh}
+  .wrap{max-width:940px;margin:0 auto}
+  h1{font-size:21px;margin:0 0 3px}
+  .sub{color:var(--mu);font-size:13px;margin:0 0 16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;
+        box-shadow:0 18px 45px rgba(0,0,0,.35)}
+  h2{font-size:13.5px;margin:0 0 11px;color:var(--acc);letter-spacing:.2px}
+  label{display:block;font-size:12px;color:var(--mu);margin:9px 0 5px;font-weight:600}
   input{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:#101527;
         color:var(--tx);font-size:14.5px;outline:none}
   input:focus{border-color:var(--acc)}
-  button{padding:11px 16px;border:0;border-radius:11px;font-weight:800;font-size:13.5px;color:#fff;
+  button{padding:12px 16px;border:0;border-radius:11px;font-weight:800;font-size:13.5px;color:#fff;
          background:linear-gradient(180deg,#7d5cff,#6d4aff);cursor:pointer}
-  button:hover{filter:brightness(1.08)} button:disabled{background:#262c44;color:#7b7896;cursor:not-allowed}
+  button:hover{filter:brightness(1.08)}
+  button:disabled{background:#262c44;color:#7b7896;cursor:not-allowed;filter:none}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .f1{flex:1;min-width:180px}.f2{flex:2;min-width:230px}.f3{flex:3;min-width:280px}
   table{width:100%;border-collapse:collapse;font-size:13px}
-  th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line)}
-  th{color:var(--mu);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px}
+  th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{color:var(--mu);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
   code{background:#0f1425;padding:2px 6px;border-radius:6px;font-size:11.5px;word-break:break-all}
-  .pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px}
+  .pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
   .yes{background:#0f2e20;color:#4ade80;border:1px solid #1f6b45}
   .no{background:#33161a;color:#ff9a9a;border:1px solid #7f2b32}
-  .mini{padding:7px 11px;font-size:12px;border-radius:9px}
+  .mini{padding:7px 10px;font-size:12px;border-radius:9px}
   .danger{background:linear-gradient(180deg,#ff6b6b,#e5484d)}
   .ghost{background:#1e1b38;color:#c3b2ff}
-  .note{color:var(--mu);font-size:12px;line-height:1.6;margin-top:9px}
+  .ok{background:linear-gradient(180deg,#3ddc6f,#22c55e)}
+  .note{color:var(--mu);font-size:12.2px;line-height:1.65;margin-top:9px}
   .box{padding:11px 13px;border-radius:11px;font-size:13px;line-height:1.6;margin-top:10px}
   .b-ok{background:#0f2e20;border:1px solid #1f6b45;color:#c9f7dd}
   .b-bad{background:#33161a;border:1px solid #7f2b32;color:#ffd4d4}
   .b-warn{background:#302410;border:1px solid #7a5a1c;color:#ffe6b3}
+  .b-info{background:#181b36;border:1px solid #343a70;color:#d9dcf5}
   .hide{display:none}
   a{color:#c3b2ff}
-  ol{margin:6px 0 0 18px;padding:0} li{margin:4px 0}
+  .kv{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px dashed #273048}
+  .kv:last-child{border-bottom:0}
+  .tiny{font-size:11.5px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>adminx — Meta_EXE Admin</h1>
-  <p class="sub">এখানে key লিখে দিলে customer <b>metapanel/downlads</b> পেজে ওই key দিয়ে download করতে পারবে</p>
+  <h1>adminx — Developer X admin panel</h1>
+  <p class="sub">key বসান → customer/user তৈরি হবে → সে download page-এ সেই key দিয়ে ফাইল নামাবে।
+     কোনো local server / bridge লাগে না — পেজটা নিজেই GitHub-এ লিখে দেয়।</p>
 
-  <!-- login -->
-  <div class="card" id="login">
-    <h2>🔐 Login</h2>
+  <!-- ══ token ═══════════════════════════════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>🔐 GitHub connect (একবার)</h2>
     <div class="row">
-      <div style="flex:1;min-width:150px"><label>Username</label><input id="u" value="admin"></div>
-      <div style="flex:1;min-width:150px"><label>Password</label><input id="p" type="password" value="admin"></div>
-      <button id="go">Login</button>
+      <div class="f1"><label>User</label><input id="u" readonly placeholder="Connect করলে দেখা যাবে"></div>
+      <div class="f3"><label>Fine-grained token — শুধু <code>Sabbirx01/metapanel</code> · Contents: Read and write</label>
+        <input id="t" type="password" placeholder="github_pat_..." autocomplete="off" spellcheck="false"></div>
+      <button id="conn">Connect</button>
+      <button id="disc" class="ghost hide">Disconnect</button>
     </div>
-    <div id="lmsg" class="note"></div>
+    <div id="cmsg" class="note">token আপনার <b>এই ব্রাউজারেই</b> (localStorage) থাকে — কোনো সার্ভারে যায় না,
+      কোনো ফাইলে লেখা হয় না। এটা ছাড়া পেজটা read-only (দেখতে পারবে, বদলাতে পারবে না)।</div>
   </div>
 
-  <!-- panel -->
-  <div id="panel" class="hide">
-    <div class="card">
-      <h2>🔌 সেভ করার ইঞ্জিন (local admintool)</h2>
-      <div id="tool" class="box b-warn">চেক করছি…</div>
-      <div class="note">
-        key সেভ করতে <b>ADMIN-TOOL.bat</b>-টা আপনার PC-তে চালু থাকতে হবে (একবার ডাবল-ক্লিক)।
-        ওটা আপনার <code>gh</code> login দিয়েই GitHub-এ commit করে — <b>কোনো token পেস্ট করতে হয় না</b>।
-        টুল বন্ধ থাকলেও এই পেজের তালিকা দেখা যাবে, শুধু সেভ হবে না।
-      </div>
-      <button class="ghost mini" id="recheck" style="margin-top:10px">🔄 আবার চেক করো</button>
+  <!-- ══ add ════════════════════════════════════════════════════════════════════════════════ -->
+  <div class="card" id="addcard">
+    <h2>➕ নতুন customer / key যোগ করুন</h2>
+    <div class="row">
+      <div class="f2"><label>Key — যেকোনো format (customer-এর licence key)</label>
+        <input id="k" placeholder="যেমন METAV2-LRSVK-RUMF2-BA9MRC3P" autocomplete="off" spellcheck="false"></div>
+      <div class="f1"><label>নাম</label><input id="n" placeholder="customer name" autocomplete="off"></div>
+      <div class="f1"><label>নোট (WhatsApp / phone)</label><input id="nt" placeholder="optional" autocomplete="off"></div>
+      <button id="add" class="ok">Add + Approve</button>
     </div>
+    <div id="kprev" class="note"></div>
+    <div id="amsg" class="note"></div>
+  </div>
 
-    <div class="card">
-      <h2>➕ নতুন key (customer-কে এটাই দেবেন)</h2>
-      <div class="row">
-        <div style="flex:2;min-width:220px"><label>Key — যেকোনো format</label>
-          <input id="newkey" placeholder="যেমন: METAV2-LRSVK-RUMF2-BA9MRC3P"></div>
-        <div style="flex:1;min-width:150px"><label>নাম / note</label><input id="newname" placeholder="customer name"></div>
-        <button id="add">Add + Approve</button>
-      </div>
-      <div id="addmsg" class="note"></div>
+  <!-- ══ list ═══════════════════════════════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>👥 অনুমতি · approved downloaders</h2>
+    <table><thead><tr><th>নাম</th><th>hash</th><th>অবস্থা</th><th>যোগ</th><th></th></tr></thead>
+      <tbody id="rows"><tr><td colspan="5" class="note">Connect করলে তালিকা আসবে।</td></tr></tbody></table>
+    <div class="row" style="margin-top:12px">
+      <button id="reload" class="ghost mini">🔄 তালিকা আবার পড়ুন</button>
+      <span id="rmsg" class="note" style="margin:0"></span>
     </div>
+  </div>
 
-    <div class="card">
-      <h2>👥 অনুমতি · approvals</h2>
-      <table>
-        <thead><tr><th>নাম</th><th>hash</th><th>অবস্থা</th><th></th></tr></thead>
-        <tbody id="rows"></tbody>
-      </table>
-      <div id="rowsmsg" class="note"></div>
-      <button class="ghost mini" id="reload" style="margin-top:10px">🔄 তালিকা refresh</button>
+  <!-- ══ release ════════════════════════════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>📦 release (download page কোন ফাইল দেবে)</h2>
+    <div id="rel" class="note">—</div>
+    <div class="row" style="margin-top:12px">
+      <button id="refresh" class="mini">🔄 GitHub release থেকে refresh</button>
     </div>
+    <div id="relmsg" class="note"></div>
+  </div>
 
-    <div class="card">
-      <h2>📦 Release</h2>
-      <div id="rel" class="note">লোড হচ্ছে…</div>
-      <button class="ghost mini" id="refresh" style="margin-top:10px">🔄 GitHub release থেকে refresh</button>
+  <!-- ══ links ══════════════════════════════════════════════════════════════════════════════ -->
+  <div class="card">
+    <h2>🔗 customer-কে যা দেবেন</h2>
+    <div class="kv"><span>Download page</span>
+      <a href="https://sabbirx01.github.io/metapanel/downlads/" target="_blank">
+        sabbirx01.github.io/metapanel/downlads/</a></div>
+    <div class="kv"><span>আপনার WhatsApp</span><a href="https://wa.me/8801410014442" target="_blank">wa.me/8801410014442</a></div>
+    <div class="note">Key যোগ করার ১-৩ মিনিট পরে GitHub Pages-এ দেখা যায় (Pages build time)।
+      এর আগে customer key দিলে পেজটা নিজেই সরাসরি GitHub থেকে নতুন তালিকা পড়ে নেয় — তাই সাথে সাথেই কাজ করবে।</div>
+  </div>
+
+  <div class="card">
+    <h2>⚙️ নিয়ম ও সতর্কতা</h2>
+    <div class="note">
+      • <b>key = customer-এর licence key</b> (licence server-এর «Metav2 client setup» থেকে generate করা,
+        format <code>METAV2-XXXXX-XXXXX-XXXXXXXX</code>). এখানে বসালে শুধু <b>hash</b> জমা হয় — key কখনো
+        plain-text-এ কোথাও যায় না, তাই তালিকা public হলেও নিরাপদ।<br>
+      • একই key আবার দিলে সেটা নতুন করে যোগ হয় না — আগেরটা <b>approve</b> হয়ে যায় (নাম বদলাতে চাইলে
+        আগে Remove, তারপর আবার Add)।<br>
+      • ❌ কেউ share করলে: সেই key <b>Block</b> করুন → সাথে সাথে download বন্ধ। আবার চালু করতে Unblock।<br>
+      • ⚠️ token কখনো কারও সাথে share করবেন না, screenshot-এ যেন না ওঠে। লিক হলে GitHub-এ ওই token
+        <b>revoke</b> করে নতুন বানান।<br>
+      • download গেটটা নরম (ফাইল release-এ public) — <b>আসল তালা licence</b>: key এক PC-তে bind হয়,
+        অন্যের PC-তে অ্যাপ চালু হবে না।
     </div>
   </div>
 </div>
 
 <script>
-const USER = "admin", PASS = "admin";        // ← prod admin পাসওয়ার্ড বদলাতে চাইলে এখানে আর admin_server.py-তে
-const BRIDGE = "http://127.0.0.1:8765";      // local admintool (ADMIN-TOOL.bat)
-const DATA = "https://sabbirx01.github.io/metapanel";   // public data (keys.json / release.json)
+// ── config ─────────────────────────────────────────────────────────────────────────────────────
+// keys.json + release.json এই repo-তে থাকে (এটাই download page পড়ে), release গুলো অন্যটায়।
+const CFG = { owner:"Sabbirx01", site:"metapanel", rel:"meta-exe", branch:"main" };
+const CUST = "https://sabbirx01.github.io/metapanel/downlads/";
 const $ = id => document.getElementById(id);
-let KEYS = { keys: [] };
+const show = (el, on) => el.classList.toggle("hide", !on);
+const LS_KEY = "mex.token", LS_USER = "mex.user";
 
-const b64d = s => decodeURIComponent(escape(atob(s)));
-async function pub(name) {
-  const r = await fetch(DATA + "/" + name + "?v=" + Date.now(), { cache: "no-store" });
-  if (!r.ok) throw new Error(name + " HTTP " + r.status);
-  return r.json();
+let TOKEN = localStorage.getItem(LS_KEY) || "";
+let KEYS_SHA = null;          // tালিকা পড়ার সময়কার sha — commit-এ লাগে (নইলে GitHub 409 দেয়)
+let KEYS = [];                // বর্তমান approved তালিকা
+
+// ── GitHub API ─────────────────────────────────────────────────────────────────────────────────
+function hdrs(extra){
+  const h = { "Accept":"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28" };
+  if (TOKEN) h["Authorization"] = "Bearer " + TOKEN;
+  return Object.assign(h, extra || {});
 }
-async function bridge(path, body) {
-  const r = await fetch(BRIDGE + path, {
-    method: body ? "POST" : "GET",
-    headers: { "Content-Type": "application/json", "X-Admin-Pass": PASS },
-    body: body ? JSON.stringify(body) : undefined
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok || j.ok === false) throw new Error(j.error || ("HTTP " + r.status));
-  return j;
+async function api(path, opts){
+  const r = await fetch("https://api.github.com" + path,
+                        Object.assign({ cache:"no-store", headers: hdrs() }, opts || {}));
+  const text = await r.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch (e) { data = { raw:text }; }
+  if (!r.ok) {
+    const msg = (data && (data.message || data.error)) || ("HTTP " + r.status);
+    const err = new Error(msg); err.status = r.status; err.data = data; throw err;
+  }
+  return data;
 }
 
-async function toolCheck() {
-  const el = $("tool");
+// ── base64 that survives Bangla (UTF-8), both ways ─────────────────────────────────────────────
+function b64enc(str){
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+function b64dec(b64){
+  const bin = atob((b64 || "").replace(/\s/g, ""));
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+// ── key → hash ─────────────────────────────────────────────────────────────────────────────────
+// ⚠️ EK DOMOI niyom jeta panel-e: trim + UPPERCASE, tarpor SHA-256 (UTF-8 hex). Python-er
+// `admin_keys.hash_key` o hubohu eta-i kore — ek character differ hole customer "key not recognised"
+// dekhto, tai duita jayga ek-i niyom share kore.
+async function hashKey(k){
+  const data = new TextEncoder().encode(k.trim().toUpperCase());
+  const buf  = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+
+// ── keys.json পড়া / লেখা ──────────────────────────────────────────────────────────────────────
+async function loadKeys(){
+  const d = await api(`/repos/${CFG.owner}/${CFG.site}/contents/keys.json?ref=${CFG.branch}&t=${Date.now()}`);
+  const data = JSON.parse(b64dec(d.content));
+  KEYS = Array.isArray(data.keys) ? data.keys : [];
+  KEYS_SHA = d.sha;
+  return data;
+}
+async function saveKeys(data, message){
+  if (!TOKEN) throw new Error("আগে Connect করুন (token ছাড়া সেভ হবে না)");
+  const body = {
+    message: message,
+    content: b64enc(JSON.stringify(data, null, 2)),
+    branch: CFG.branch,
+  };
+  if (KEYS_SHA) body.sha = KEYS_SHA;              // আগের version-এর উপরেই লিখছি
   try {
-    const j = await bridge("/ping");
-    el.className = "box b-ok";
-    el.innerHTML = "✅ সেভ করার ইঞ্জিন চলছে" + (j.user ? " — GitHub: <b>" + j.user + "</b>" : "") +
-                   " · এখন " + (j.keys || 0) + "টা key";
-    return true;
+    const r = await api(`/repos/${CFG.owner}/${CFG.site}/contents/keys.json`, {
+      method:"PUT", headers: hdrs({ "Content-Type":"application/json" }), body: JSON.stringify(body) });
+    KEYS_SHA = r.content.sha;                     // পরের commit-এর জন্য নতুন sha
+    return r;
   } catch (e) {
-    el.className = "box b-bad";
-    el.innerHTML = "⚠️ <b>ADMIN-TOOL.bat</b> চালু নেই — এখন সেভ করা যাবে না।<br>" +
-      "Product folder-এ <b>ADMIN-TOOL.bat</b> ডাবল-ক্লিক করে চালু করুন, তারপর " +
-      "<a href='#' id='re2'>আবার চেক</a> করুন।<br><span style='opacity:.75'>(" + e.message + ")</span>";
-    const a = $("re2"); if (a) a.onclick = ev => { ev.preventDefault(); toolCheck(); };
-    return false;
+    // 409 = তালিকা এর মধ্যে বদলেছে (অন্য PC/ADMIN.bat থেকে)। একবার নতুন করে পড়ে আবার চেষ্টা —
+    // নইলে একটা "conflict" দেখিয়ে developer ভাবতেন পেজ নষ্ট।
+    if (e.status === 409) {
+      await loadKeys();
+      body.sha = KEYS_SHA;
+      const r = await api(`/repos/${CFG.owner}/${CFG.site}/contents/keys.json`, {
+        method:"PUT", headers: hdrs({ "Content-Type":"application/json" }), body: JSON.stringify(body) });
+      KEYS_SHA = r.content.sha;
+      msg("rmsg", "b-warn", "তালিকা এর মধ্যে বদলেছিল — নতুন করে পড়ে আবার লিখলাম ✓");
+      return r;
+    }
+    throw e;
   }
 }
 
-function render() {
-  const tb = $("rows"); tb.innerHTML = "";
-  if (!KEYS.keys.length) {
-    tb.innerHTML = "<tr><td colspan='4' style='color:#98a3c2'>এখনো কোনো key নেই — উপরে লিখে Add করুন</td></tr>";
+// ── render ─────────────────────────────────────────────────────────────────────────────────────
+function pill(k){
+  return k.approved === false
+    ? '<span class="pill no">blocked</span>'
+    : '<span class="pill yes">approved</span>';
+}
+function render(){
+  const tb = $("rows");
+  if (!KEYS.length) {
+    tb.innerHTML = '<tr><td colspan="5" class="note">তালিকা খালি — উপরে key বসিয়ে Add + Approve করুন।</td></tr>';
     return;
   }
-  KEYS.keys.forEach((k, i) => {
-    const tr = document.createElement("tr");
-    const state = k.approved ? "yes" : "no";
-    tr.innerHTML = `<td>${k.name || "—"}</td>` +
-                   `<td><code>${(k.hash || "").slice(0, 18)}…</code></td>` +
-                   `<td><span class="pill ${state}">${k.approved ? "APPROVED" : "BLOCKED"}</span></td>`;
-    const td = document.createElement("td");
-    const b1 = document.createElement("button");
-    b1.className = "mini " + (k.approved ? "ghost" : "");
-    b1.textContent = k.approved ? "Block" : "Approve";
-    b1.onclick = async () => {
-      $("rowsmsg").textContent = "সেভ হচ্ছে…";
-      try { await bridge(k.approved ? "/block" : "/unblock", { needle: k.hash });
-            $("rowsmsg").innerHTML = '<span style="color:#4ade80">✓ সেভ হয়েছে (১-৩ মিনিটে live)</span>';
-            loadKeys(); }
-      catch (e) { $("rowsmsg").innerHTML = '<span style="color:#ff9a9a">✗ ' + e.message + "</span>"; }
-    };
-    const b2 = document.createElement("button");
-    b2.className = "mini danger"; b2.textContent = "Delete"; b2.style.marginLeft = "6px";
-    b2.onclick = async () => {
-      $("rowsmsg").textContent = "মুছছি…";
-      try { await bridge("/remove", { needle: k.hash });
-            $("rowsmsg").innerHTML = '<span style="color:#4ade80">✓ মুছে গেছে</span>'; loadKeys(); }
-      catch (e) { $("rowsmsg").innerHTML = '<span style="color:#ff9a9a">✗ ' + e.message + "</span>"; }
-    };
-    td.append(b1, b2); tr.append(td); tb.append(tr);
-  });
+  tb.innerHTML = KEYS.map((k, i) => {
+    const label = k.name ? esc(k.name) : "(নাম নেই)";
+    const sub   = k.note ? '<div class="tiny" style="color:#98a3c2">' + esc(k.note) + '</div>' : "";
+    const act   = k.approved === false
+      ? `<button class="mini ghost" data-act="unblock" data-i="${i}">Unblock</button>`
+      : `<button class="mini ghost" data-act="block" data-i="${i}">Block</button>`;
+    return `<tr>
+      <td>${label}${sub}</td>
+      <td><code>${esc((k.hash||"").slice(0,16))}…</code></td>
+      <td>${pill(k)}</td>
+      <td class="tiny">${esc(k.added||"—")}</td>
+      <td><div class="row" style="gap:6px;flex-wrap:nowrap">${act}
+        <button class="mini danger" data-act="remove" data-i="${i}">Remove</button></div></td>
+    </tr>`;
+  }).join("");
 }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",
+  '"':"&quot;","'":"&#39;"}[c])); }
+function msg(id, cls, html){ const el = $(id); el.className = "box " + cls; el.innerHTML = html; }
+function note(id, html){ const el = $(id); el.className = "note"; el.innerHTML = html; }
 
-async function loadKeys() {
-  try { KEYS = await pub("keys.json"); render(); }
-  catch (e) { $("rowsmsg").innerHTML = '<span style="color:#ff9a9a">তালিকা পড়া গেল না: ' + e.message + "</span>"; }
-}
-async function loadRel() {
+// ── actions ────────────────────────────────────────────────────────────────────────────────────
+async function connect(){
+  const t = $("t").value.trim();
+  if (!t) { note("cmsg", "token বসান — তারপর Connect।"); return; }
+  TOKEN = t;
+  $("conn").disabled = true;
   try {
-    const r = await pub("release.json");
-    $("rel").innerHTML = `Version <b>${r.version || "—"}</b> · <code>${r.asset || "—"}</code>` +
-      `<br>${r.size_mb || "—"} MB · <a href="${r.url || "#"}" target="_blank">download link</a>`;
-  } catch (e) { $("rel").innerHTML = '<span style="color:#ff9a9a">release.json নেই — "refresh" চাপুন</span>'; }
-}
-
-$("go").onclick = async () => {
-  if ($("u").value.trim() !== USER || $("p").value !== PASS) {
-    $("lmsg").innerHTML = '<span style="color:#ff9a9a">✗ ভুল username/password</span>'; return;
+    const me = await api("/user");
+    localStorage.setItem(LS_KEY, TOKEN);
+    localStorage.setItem(LS_USER, me.login);
+    $("u").value = me.login;
+    const perm = await api(`/repos/${CFG.owner}/${CFG.site}`).catch(() => null);
+    note("cmsg", perm
+      ? `✅ connected — <b>${esc(me.login)}</b> · লিখবে: <code>${CFG.owner}/${CFG.site}/keys.json</code>`
+      : `⚠️ connected (${esc(me.login)}) কিন্তু <b>${CFG.owner}/${CFG.site}</b> repo দেখা যাচ্ছে না —
+         token-এ Contents: Read and write দেওয়া আছে কি না দেখুন।`);
+    $("t").value = "";
+    show($("disc"), true);
+    await refreshAll();
+  } catch (e) {
+    TOKEN = "";
+    msg("cmsg", "b-bad", "❌ token কাজ করল না — " + esc(e.message) +
+        "<br><span class='tiny'>Fine-grained token → Repository access: only <code>" + CFG.site +
+        "</code> · Permissions → Contents: Read and write</span>");
+  } finally {
+    $("conn").disabled = false;
   }
-  $("login").classList.add("hide");
-  $("panel").classList.remove("hide");
-  await loadKeys(); await loadRel(); toolCheck();
-};
-$("recheck").onclick = toolCheck;
-$("reload").onclick = loadKeys;
-$("add").onclick = async () => {
-  const k = $("newkey").value.trim();
-  if (k.length < 4) { $("addmsg").innerHTML = '<span style="color:#ff9a9a">key টা পুরো লিখুন</span>'; return; }
-  $("addmsg").textContent = "সেভ হচ্ছে…";
+}
+function disconnect(){
+  localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_USER);
+  TOKEN = ""; KEYS = []; KEYS_SHA = null;
+  $("u").value = ""; show($("disc"), false);
+  render();
+  msg("cmsg", "b-info", "Disconnect হলো — token এই ব্রাউজার থেকে মুছে গেল। আবার ঢুকতে Connect করুন।");
+}
+async function refreshAll(){
   try {
-    const j = await bridge("/add", { key: k, name: $("newname").value.trim() });
-    $("addmsg").innerHTML = '<span style="color:#4ade80">✓ ' + (j.message || "যোগ হয়েছে") +
-      '</span><br><code>' + (j.hash || "") + "</code>";
-    $("newkey").value = ""; $("newname").value = "";
-    setTimeout(loadKeys, 3000);
-  } catch (e) { $("addmsg").innerHTML = '<span style="color:#ff9a9a">✗ ' + e.message + "</span>"; }
-};
-$("refresh").onclick = async () => {
-  $("rel").textContent = "refresh করছি…";
-  try { await bridge("/refresh", {}); await loadRel(); }
-  catch (e) { $("rel").innerHTML = '<span style="color:#ff9a9a">✗ ' + e.message + "</span>"; }
-};
+    await loadKeys();
+    render();
+    note("rmsg", `✅ তালিকা পড়া হলো — ${KEYS.length}টা entry · <code>${(KEYS_SHA||"").slice(0,8)}</code>`);
+  } catch (e) {
+    msg("rmsg", "b-bad", "❌ তালিকা পড়া গেল না — " + esc(e.message));
+  }
+  loadRelease();
+}
+async function addKey(){
+  const k = $("k").value.trim(), n = $("n").value.trim(), nt = $("nt").value.trim();
+  if (k.length < 4) { note("kprev", "key টা পুরো লিখুন।"); return; }
+  if (!TOKEN) { msg("amsg", "b-bad", "আগে উপরে Connect করুন।"); return; }
+  $("add").disabled = true;
+  try {
+    const h = await hashKey(k);
+    const data = await loadKeys();                   // সর্বশেষ তালিকা — হারানো/ওভাররাইট নেই
+    const hit = KEYS.find(x => String(x.hash||"").toLowerCase() === h);
+    if (hit) {
+      hit.approved = true;
+      if (n) hit.name = n;
+      if (nt) hit.note = nt;
+      await saveKeys(data, `admin: approve ${n || h.slice(0,8)}`);
+      msg("amsg", "b-ok", `ℹ️ এই key আগেই ছিল — <b>approve</b> করে দিলাম (${esc(n || h.slice(0,8))})`);
+    } else {
+      KEYS.push({ hash:h, name:n || "", approved:true,
+                  id:(n || h.slice(0,8)).trim().toLowerCase().replace(/ /g,"-"),
+                  note:nt || "", added:new Date().toISOString().slice(0,10) });
+      await saveKeys(data, `admin: add/approve ${n || h.slice(0,8)}`);
+      msg("amsg", "b-ok", `✅ যোগ হলো → <b>${esc(n || "(নাম নেই)")}</b> · hash <code>${h.slice(0,16)}…</code>
+        <br><span class="tiny">এখন customer <a href="${CUST}" target="_blank">download page</a>-এ এই key দিলেই
+        download পাবে (সাথে সাথেই কাজ করবে — পেজ নিজেই GitHub থেকে নতুন তালিকা পড়ে)।</span>`);
+      $("k").value = ""; $("n").value = ""; $("nt").value = ""; note("kprev", "");
+    }
+    render();
+  } catch (e) {
+    msg("amsg", "b-bad", "❌ সেভ হলো না — " + esc(e.message));
+  } finally {
+    $("add").disabled = false;
+  }
+}
+async function change(act, i){
+  if (!TOKEN) return;
+  const k = KEYS[i]; if (!k) return;
+  const label = k.name || String(k.hash||"").slice(0,8);
+  if (act === "remove" && !confirm(`"${label}" তালিকা থেকে মুছে ফেলব? (আবার Add করলে ফিরে আসবে)`)) return;
+  try {
+    const data = await loadKeys();
+    const idx = KEYS.findIndex(x => String(x.hash) === String(k.hash));
+    if (idx < 0) { await refreshAll(); return; }
+    if (act === "remove") KEYS.splice(idx, 1);
+    else KEYS[idx].approved = (act === "unblock");
+    await saveKeys(data, `admin: ${act} ${label}`);
+    render();
+    msg("rmsg", "b-ok", `✅ ${act} → ${esc(label)}`);
+  } catch (e) {
+    msg("rmsg", "b-bad", "❌ " + esc(e.message));
+  }
+}
+async function loadRelease(){
+  try {
+    const r = await api(`/repos/${CFG.owner}/${CFG.rel}/releases/latest`);
+    const zip = (r.assets || []).find(a => /-exe-.*\.zip$/i.test(a.name));
+    if (!zip) { note("rel", "কোনো exe zip asset নেই।"); return null; }
+    note("rel", `<div class="kv"><span>Version</span><b>${esc(r.tag_name||"")}</b></div>
+      <div class="kv"><span>File</span>${esc(zip.name)}</div>
+      <div class="kv"><span>Size</span>${(zip.size/1048576).toFixed(1)} MB</div>
+      <div class="kv"><span>SHA-256</span><code>${esc((zip.digest||"—").replace("sha256:","").slice(0,32))}…</code></div>
+      <div class="kv"><span>Published</span><span class="tiny">${esc((r.published_at||"").slice(0,10))}</span></div>`);
+    return { version:String(r.tag_name||"").replace(/^v/i,""), asset:zip.name,
+             size_mb:+(zip.size/1048576).toFixed(1), url:zip.browser_download_url,
+             published:r.published_at, sha256:(zip.digest||"").replace("sha256:","") };
+  } catch (e) {
+    note("rel", "release পড়া গেল না — " + esc(e.message));
+    return null;
+  }
+}
+async function refreshRelease(){
+  if (!TOKEN) { msg("relmsg", "b-bad", "আগে Connect করুন।"); return; }
+  $("refresh").disabled = true;
+  try {
+    const rel = await loadRelease();
+    if (!rel) throw new Error("release পাওয়া গেল না");
+    rel.note = "একই signed ফাইল যা app-এর auto-update ব্যবহার করে";
+    // 🔐 sha256 GitHub-এর digest থেকেই আসে (asset-এর digest field) — এটাই অ্যাপের auto-update
+    // যাচাই করে, তাই পেজে আর ফাইল নামিয়ে hash করার দরকার নেই (৯৫ MB নামানো মানে স্লো + নির্ভুলও নয়)
+    const d = await api(`/repos/${CFG.owner}/${CFG.site}/contents/release.json?ref=${CFG.branch}&t=${Date.now()}`);
+    const body = { message:`admin: release v${rel.version}`, content:b64enc(JSON.stringify(rel, null, 2)),
+                   branch:CFG.branch, sha:d.sha };
+    await api(`/repos/${CFG.owner}/${CFG.site}/contents/release.json`, {
+      method:"PUT", headers: hdrs({ "Content-Type":"application/json" }), body: JSON.stringify(body) });
+    msg("relmsg", "b-ok", `✅ release.json → v${esc(rel.version)} · ${esc(rel.asset)}
+      ${rel.sha256 ? " · sha256 " + esc(rel.sha256.slice(0,16)) + "…" : ""}`);
+  } catch (e) {
+    msg("relmsg", "b-bad", "❌ refresh হলো না — " + esc(e.message));
+  } finally {
+    $("refresh").disabled = false;
+  }
+}
+
+// ── wiring ─────────────────────────────────────────────────────────────────────────────────────
+$("conn").onclick   = connect;
+$("disc").onclick   = disconnect;
+$("add").onclick    = addKey;
+$("reload").onclick = refreshAll;
+$("refresh").onclick= refreshRelease;
+$("t").addEventListener("keydown", e => { if (e.key === "Enter") connect(); });
+$("k").addEventListener("input", async () => {                 // live hash preview — ভুল এড়াতে
+  const v = $("k").value.trim();
+  note("kprev", v.length < 4 ? "" : "hash হবে: <code>" + (await hashKey(v)).slice(0,20) + "…</code>");
+});
+$("rows").addEventListener("click", e => {
+  const b = e.target.closest("button[data-act]");
+  if (b) change(b.dataset.act, +b.dataset.i);
+});
+
+(async function boot(){
+  const who = localStorage.getItem(LS_USER);
+  if (TOKEN) {
+    $("u").value = who || "(saved)";
+    show($("disc"), true);
+    note("cmsg", "সেভ করা token দিয়ে ঢুকছি …");
+    try { await api("/user"); note("cmsg", `✅ connected (সেভ করা token) — <b>${esc(who||"")}</b>`);
+          await refreshAll(); }
+    catch (e) { disconnect();
+                msg("cmsg", "b-bad", "সেভ করা token আর কাজ করছে না (" + esc(e.message) +
+                    ") — নতুন token বসান।"); }
+  } else {
+    note("cmsg", "token ছাড়া এখন শুধু <b>দেখা</b> যায় — key যোগ করতে Connect করুন।");
+    loadRelease();
+  }
+})();
 </script>
 </body>
 </html>
