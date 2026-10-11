@@ -4,6 +4,6 @@
   "size_mb": 95.6,
   "url": "https://github.com/Sabbirx01/meta-exe/releases/download/v1.1.2/Meta_EXE-exe-1.1.2.zip",
   "published": "2026-10-11T10:45:42Z",
-  "note": "একই signed ফাইল যা app-এর auto-update ব্যবহার করে",
-  "sha256": "f3fc754cb33c031fd53a652dc81429b68f6e2ed5905843c086b1323f0d5faabb"
+  "sha256": "f3fc754cb33c031fd53a652dc81429b68f6e2ed5905843c086b1323f0d5faabb",
+  "note": "একই signed ফাইল যা app-এর auto-update ব্যবহার করে"
 }
