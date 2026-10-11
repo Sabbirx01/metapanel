@@ -1,4 +1,12 @@
 {
   "_readme": "Approved downloaders for metapanel/downlads. Only SHA-256 hashes are stored — never the keys themselves, because GitHub Pages serves this file publicly. The hash is sha256(trim(UPPERCASE(key))) as UTF-8 hex. Add or block keys with ADMIN.bat (product root) — it uses the local gh login, so no token is ever pasted anywhere.",
-  "keys": []
+  "keys": [
+    {
+      "hash": "7e62731d0e362b8db2143da20b57ac9d5a207e217b1abb33a18732d33f0b97ba",
+      "name": "",
+      "approved": true,
+      "id": "7e62731d",
+      "added": "2026-10-11"
+    }
+  ]
 }
