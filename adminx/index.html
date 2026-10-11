@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Developer X — moved</title>
+<style>
+  :root{--bg:#0a0d1a;--card:#141a2e;--line:#273048;--tx:#eaeefb;--mu:#98a3c2;--acc:#8b6bff}
+  *{box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+  body{margin:0;min-height:100vh;background:radial-gradient(900px 500px at 50% -10%,#1b1f3d 0%,var(--bg) 60%);
+       color:var(--tx);display:flex;align-items:center;justify-content:center;padding:20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:24px;
+        max-width:560px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  h1{font-size:20px;margin:0 0 6px}
+  p{color:var(--mu);font-size:13.5px;line-height:1.6}
+  a.btn{display:inline-block;margin-top:10px;padding:13px 20px;border-radius:14px;font-weight:800;
+        color:#fff;text-decoration:none;background:linear-gradient(180deg,#7d5cff,#6d4aff)}
+  .box{margin-top:16px;padding:14px;border-radius:12px;background:#181b36;border:1px solid #343a70;
+       font-size:13px;line-height:1.65}
+  code{background:#0f1425;padding:2px 6px;border-radius:6px;font-size:12.5px}
+  ol{margin:8px 0 0 18px;padding:0} li{margin:5px 0}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>📦 পেজটা সরে গেছে · this page moved</h1>
+  <p>ডাউনলোড পেজ এখন এখানে — <b>metapanel/downlads</b>। কয়েক সেকেন্ডে নিজে নিয়ে যাবে।</p>
+  <a class="btn" id="go" href="https://sabbirx01.github.io/metapanel/downlads/">
+    ➡️ https://sabbirx01.github.io/metapanel/downlads/
+  </a>
+
+  <div class="box">
+    <b>🔑 admin (token লাগে না)</b>
+    <ol>
+      <li>এই PC-তে <code>Meta_EXE\ADMIN.bat</code> ডাবল-ক্লিক করুন</li>
+      <li>মেনু থেকে <b>1</b> — নতুন key add + approve (customer-কে যে key দিলেন সেটাই বসান)</li>
+      <li>GitHub-এ নিজে commit হয়ে যায় (আপনার <code>gh</code> login দিয়েই) — customer-এর পেজে
+          দেখা যেতে <b>১-৩ মিনিট</b> লাগে</li>
+    </ol>
+    <p style="margin:10px 0 0">
+      আগের ওয়েব admin প্যানেলটা বন্ধ করা হয়েছে: static পেজ সার্ভার ছাড়া কিছু সেভ করতে পারে না,
+      তাই ওটার GitHub token লাগত — আর ব্রাউজারে বসানো token মানে ওই ব্রাউজার খোলা যে কেউ সেটা পেয়ে যায়।
+      <code>ADMIN.bat</code> একই কাজ করে, কিছু পেস্ট না করেই।
+    </p>
+  </div>
+</div>
+<script>
+  // meta refresh + js, because one of the two always works in an in-app browser
+  setTimeout(function () { location.replace("https://sabbirx01.github.io/metapanel/downlads/"); }, 2500);
+</script>
+</body>
+</html>
