@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Developer X — Download</title>
+<style>
+  :root{--bg:#0a0d1a;--card:#141a2e;--line:#273048;--tx:#eaeefb;--mu:#98a3c2;--acc:#8b6bff;--ok:#22c55e;--bad:#f87171;--warn:#fbbf24}
+  *{box-sizing:border-box;font-family:'Segoe UI',system-ui,-apple-system,sans-serif}
+  body{margin:0;min-height:100vh;background:radial-gradient(900px 500px at 50% -10%,#1b1f3d 0%,var(--bg) 60%);
+       color:var(--tx);display:flex;align-items:center;justify-content:center;padding:20px}
+  .wrap{width:100%;max-width:520px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;
+        box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  h1{font-size:21px;margin:0 0 4px;letter-spacing:.2px}
+  .sub{color:var(--mu);font-size:13px;margin:0 0 18px}
+  label{display:block;font-size:12px;color:var(--mu);margin:0 0 6px;font-weight:600}
+  input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);
+        background:#101527;color:var(--tx);font-size:15px;outline:none}
+  input:focus{border-color:var(--acc)}
+  button{width:100%;margin-top:14px;padding:14px;border:0;border-radius:14px;font-size:15px;font-weight:800;
+         color:#fff;background:linear-gradient(180deg,#7d5cff,#6d4aff);cursor:pointer}
+  button:hover{background:linear-gradient(180deg,#8a6bff,#7a5cff)}
+  button:disabled{background:#262c44;color:#7b7896;cursor:not-allowed}
+  .box{margin-top:16px;padding:14px;border-radius:12px;font-size:13.5px;line-height:1.55;display:none}
+  .box.show{display:block}
+  .info{background:#181b36;border:1px solid #343a70}
+  .good{background:#0f2e20;border:1px solid #1f6b45;color:#c9f7dd}
+  .bad{background:#33161a;border:1px solid #7f2b32;color:#ffd4d4}
+  .warn{background:#302410;border:1px solid #7a5a1c;color:#ffe6b3}
+  a{color:#c3b2ff}
+  .meta{color:var(--mu);font-size:12px;margin-top:10px}
+  .row{display:flex;gap:10px}
+  .row button{margin-top:0}
+  .kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #273048}
+  .kv:last-child{border-bottom:0}
+  code{background:#0f1425;padding:2px 6px;border-radius:6px;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Developer X — Panel Download</h1>
+    <p class="sub">আপনার key দিয়ে লগইন করুন · sign in with the key you were given</p>
+
+    <label for="k">Licence Key</label>
+    <input id="k" placeholder="আপনার key এখানে" autocomplete="off" spellcheck="false">
+    <button id="go">🔓 লগইন / Login</button>
+
+    <div id="msg" class="box"></div>
+
+    <div id="dl" class="box good">
+      <div style="font-weight:800;margin-bottom:8px">✅ অনুমতি পাওয়া গেছে · approved</div>
+      <div class="kv"><span>Version</span><span id="d-ver">—</span></div>
+      <div class="kv"><span>File</span><span id="d-file">—</span></div>
+      <div class="kv"><span>Size</span><span id="d-size">—</span></div>
+      <div class="kv"><span>SHA-256</span><span id="d-sha" style="font-size:11px">—</span></div>
+      <button id="dlbtn" style="margin-top:14px">⬇️ Download</button>
+      <div class="meta">GitHub থেকেই নামবে — signature-যাচাই করা একই ফাইল যা auto-update-ও ব্যবহার করে।</div>
+    </div>
+
+    <div id="pending" class="box warn">
+      <div style="font-weight:800;margin-bottom:6px">⏳ অনুমতির অপেক্ষায় · waiting for approval</div>
+      আপনার key টা ডেভেলপারের কাছে পাঠানো হয়েছে কি না নিশ্চিত করুন। অনুমতি পেলে এই পেজেই Download বাটন আসবে
+      (key টা আবার বাসান)।
+      <button id="req" style="margin-top:12px;background:linear-gradient(180deg,#3ddc6f,#22c55e)">
+        📩 অনুমতি চাই · Request access
+      </button>
+      <div class="meta">এতে একটা request খুলবে — key নম্বরটা লেখা থাকবে।</div>
+    </div>
+
+    <div id="bad" class="box bad">
+      <div style="font-weight:800">❌ এই key খুঁজে পাওয়া গেল না · key not recognised</div>
+      <div class="meta">key ঠিক করে লিখুন, বা নিচের বাটন দিয়ে access চান।</div>
+      <button id="req2" style="margin-top:12px;background:linear-gradient(180deg,#3ddc6f,#22c55e)">
+        📩 অনুমতি চাই · Request access
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── config ────────────────────────────────────────────────────────────────────────────────────
+const CFG = {
+  owner: "Sabbirx01",
+  repo:  "meta-exe",          // releases live here (public) — the same assets the app auto-updates from
+  requestRepo: "metapanel",      // where the "request access" issue is opened
+};
+const $ = id => document.getElementById(id);
+const show = (el, on) => el.classList.toggle("show", on);
+
+// ── key handling ──────────────────────────────────────────────────────────────────────────────
+// The published list holds only SHA-256 HASHES of the keys, never the keys themselves — this page is
+// public, so a list of plain keys would be a list of everybody's licence. Same normalisation on both
+// sides: trim + uppercase (the keys this tool ships are uppercase), hashed as UTF-8.
+async function hashKey(k) {
+  const data = new TextEncoder().encode(k.trim().toUpperCase());
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function getJSON(name) {
+  const r = await fetch(name + "?v=" + Date.now(), {cache: "no-store"});
+  if (!r.ok) throw new Error(name + " — HTTP " + r.status);
+  return r.json();
+}
+
+function say(kind, html) {
+  const el = $("msg");
+  el.className = "box show " + kind;
+  el.innerHTML = html;
+}
+
+async function check() {
+  const typed = $("k").value.trim();
+  show($("dl"), false); show($("pending"), false); show($("bad"), false); show($("msg"), false);
+  if (typed.length < 4) { say("warn", "key টা পুরো লিখুন · enter your full key"); return; }
+
+  let keys, rel;
+  try {
+    [keys, rel] = await Promise.all([getJSON("/metapanel/keys.json"), getJSON("/metapanel/release.json")]);
+  } catch (e) {
+    say("bad", "ফাইল লোড করা গেল না · could not load the list<br><code>" + e.message + "</code>");
+    return;
+  }
+
+  const h = await hashKey(typed);
+  const me = (keys.keys || []).find(x => (x.hash || "").toLowerCase() === h);
+
+  if (me && me.approved) {
+    show($("dl"), true);
+    $("d-ver").textContent  = rel.version || "—";
+    $("d-file").textContent = rel.asset || "—";
+    $("d-size").textContent = rel.size_mb ? rel.size_mb + " MB" : "—";
+    $("d-sha").textContent  = (rel.sha256 || "—").slice(0, 24) + "…";
+    $("dlbtn").onclick = () => { window.location.href = rel.url; };
+    if (me.name) say("good", "স্বাগতম, <b>" + me.name + "</b> — স্বাগতম!");
+    return;
+  }
+  if (me) {
+    show($("pending"), true);
+    return;
+  }
+  show($("bad"), true);
+}
+
+async function request() {
+  // The issue carries the HASH, which is the only thing the admin needs — and the only thing worth
+  // putting in a public issue: the key itself stays out of GitHub's history where it would be permanent.
+  const typed = $("k").value.trim();
+  const h = typed ? await hashKey(typed) : "";
+  const title = encodeURIComponent("Download access request — " + (typed.slice(0, 20) || "no key given"));
+  const body = encodeURIComponent(
+    "**Key:** `" + (typed || "(key টা লিখিনি)") + "`\n\n" +
+    "**SHA-256 hash:** `" + h + "`\n\n" +
+    "**কোথা থেকে:** download page\n" +
+    "**কখন:** " + new Date().toISOString() + "\n\n" +
+    "_Admin: `ADMIN.bat` খুলে এই hash টা **Add** করলেই key টা চালু হয়ে যাবে।_");
+  window.open(`https://github.com/${CFG.owner}/${CFG.requestRepo}/issues/new?title=${title}&body=${body}`,
+              "_blank");
+}
+
+$("go").onclick = check;
+$("k").addEventListener("keydown", e => { if (e.key === "Enter") check(); });
+$("req").onclick = request;
+$("req2").onclick = request;
+</script>
+</body>
+</html>
