@@ -61,13 +61,20 @@
     <h2>🔐 GitHub connect (একবার)</h2>
     <div class="row">
       <div class="f1"><label>User</label><input id="u" readonly placeholder="Connect করলে দেখা যাবে"></div>
-      <div class="f3"><label>Fine-grained token — শুধু <code>Sabbirx01/metapanel</code> · Contents: Read and write</label>
-        <input id="t" type="password" placeholder="github_pat_..." autocomplete="off" spellcheck="false"></div>
+      <div class="f3"><label>Token — <code>gho_…</code> (gh CLI) বা <code>github_pat_…</code> (fine-grained) ·
+        <code>Sabbirx01/metapanel</code>-এ Contents: Read and write</label>
+        <div class="row" style="gap:8px;flex-wrap:nowrap;align-items:center">
+          <input id="t" type="password" placeholder="gho_... / github_pat_..." autocomplete="off" spellcheck="false">
+          <button id="eye" class="ghost mini" type="button" title="লিখাটা দেখুন — কপি ঠিক হয়েছে কি না">👁</button>
+        </div>
+        <div id="thint" class="tiny" style="color:#98a3c2;margin-top:5px"></div></div>
       <button id="conn">Connect</button>
       <button id="disc" class="ghost hide">Disconnect</button>
     </div>
     <div id="cmsg" class="note">token আপনার <b>এই ব্রাউজারেই</b> (localStorage) থাকে — কোনো সার্ভারে যায় না,
-      কোনো ফাইলে লেখা হয় না। এটা ছাড়া পেজটা read-only (দেখতে পারবে, বদলাতে পারবে না)।</div>
+      কোনো ফাইলে লেখা হয় না। এটা ছাড়া পেজটা read-only (দেখতে পারবে, বদলাতে পারবে না)।<br>
+      💡 সবচেয়ে সহজ: এই PC-তে <code>gh auth token | clip</code> চালান → token সোজা clipboard-এ চলে যাবে
+      (স্ক্রিনে দেখা যাবে না) → এখানে <b>Ctrl+V</b> → Connect।</div>
   </div>
 
   <!-- ══ add ════════════════════════════════════════════════════════════════════════════════ -->
@@ -261,7 +268,12 @@ function note(id, html){ const el = $(id); el.className = "note"; el.innerHTML =
 
 // ── actions ────────────────────────────────────────────────────────────────────────────────────
 async function connect(){
-  const t = $("t").value.trim();
+  // ⚠️ `trim()` EKAA chhilo, ar setai dhora khelo: GitHub-e token paste korar somoy onek somoy MAJHE
+  // line-break/space dhuke jay (terminal theke copy, editor-er word-wrap, e-mail). Kintu token-er vitore
+  // kokhono whitespace thake na — tai sob whitespace mujhe fela nirapod, ar setai "Bad credentials"
+  // er sobcheye common karon ta saray dey.
+  const raw = $("t").value;
+  const t = raw.replace(/\s+/g, "");
   if (!t) { note("cmsg", "token বসান — তারপর Connect।"); return; }
   TOKEN = t;
   $("conn").disabled = true;
@@ -280,9 +292,19 @@ async function connect(){
     await refreshAll();
   } catch (e) {
     TOKEN = "";
-    msg("cmsg", "b-bad", "❌ token কাজ করল না — " + esc(e.message) +
-        "<br><span class='tiny'>Fine-grained token → Repository access: only <code>" + CFG.site +
-        "</code> · Permissions → Contents: Read and write</span>");
+    // "Bad credentials" মানে GitHub **লিখাটাই** চিনল না (URL/পেজ/galat নয়) — তাই মেসেজটা আসল কারণটার
+    // দিকেই নিয়ে যায়, পেজ debugging-এর দিকে নয়। বাকি status গুলো (404/403) মানে token ঠিক, অনুমতি কম।
+    if (e.status === 401) {
+      msg("cmsg", "b-bad", "❌ <b>Bad credentials</b> — token-টা GitHub চিনতে পারল না।" +
+        "<br><span class='tiny'>১) পুরো token কপি হয়নি (মাঝে কাটা/line-break) — 👁 চেপে দেখে নিন, " +
+        "নিচে লেখা সংখ্যাটা মিলিয়ে নিন।<br>" +
+        "২) token পুরনো/revoke হয়ে গেছে — GitHub-এ আবার বানান (token একবারই দেখানো হয়)।<br>" +
+        "৩) সহজ পথ: এই PC-তে <code>gh auth token | clip</code> → এখানে Ctrl+V → Connect।</span>");
+    } else {
+      msg("cmsg", "b-bad", "❌ token কাজ করল না (" + esc(e.message) + ", HTTP " + (e.status || "?") + ")" +
+        "<br><span class='tiny'>token ঠিক আছে কিন্তু অনুমতি কম হতে পারে → Repository access: only <code>" +
+        CFG.site + "</code> · Permissions → <b>Contents: Read and write</b></span>");
+    }
   } finally {
     $("conn").disabled = false;
   }
@@ -402,6 +424,18 @@ $("add").onclick    = addKey;
 $("reload").onclick = refreshAll;
 $("refresh").onclick= refreshRelease;
 $("t").addEventListener("keydown", e => { if (e.key === "Enter") connect(); });
+// 👁 / hint — "Bad credentials"-এর আসল কারণ ধরা: পুরোটা পেস্ট হয়েছে কি না।
+// token নিজে কখনো দেখানো হয় না, শুধু দৈর্ঘ্য আর prefix (prefix গোপন কিছু নয়) — তাতেই বোঝা যায়
+// পুরোটা এসেছে কি না (gho_ = ৪০ অক্ষর, github_pat_ = ~৯৩)।
+$("eye").onclick = () => { const f = $("t"); f.type = f.type === "password" ? "text" : "password"; };
+$("t").addEventListener("input", () => {
+  const raw = $("t").value, t = raw.replace(/\s+/g, ""), ws = raw.length - t.length;
+  if (!t) { note("thint", ""); return; }
+  const bits = [`${t.length} অক্ষর`, `শুরু: <code>${esc(t.slice(0, 12))}…</code>`];
+  if (ws) bits.push(`<b style="color:#fbbf24">মাঝে ${ws}টা space/line-break — Connect চাপলে সরিয়ে নেওয়া হবে</b>`);
+  if (t.length < 20) bits.push('<b style="color:#f87171">এটা অনেক ছোট — কপি কাটা পড়েছে</b>');
+  note("thint", bits.join(" · "));
+});
 $("k").addEventListener("input", async () => {                 // live hash preview — ভুল এড়াতে
   const v = $("k").value.trim();
   note("kprev", v.length < 4 ? "" : "hash হবে: <code>" + (await hashKey(v)).slice(0,20) + "…</code>");
