@@ -1,13 +1,4 @@
 {
   "_readme": "Approved downloaders. Only SHA-256 hashes are stored — never the keys themselves, because this file is served publicly by GitHub Pages. The hash is sha256(trim(uppercase(key))) as UTF-8 hex. Edit it from admin.html (recommended) or add rows by hand with: python source/tools/publish_site.py --hash-key \"META-XXXX-XXXX\"",
-  "keys": [
-    {
-      "hash": "0d50f0b5b6c2294f9fb0677145b6b483d2d0096abc05e0cf7e1928a48ceb1fbb",
-      "name": "VERIFY-TEST",
-      "approved": true,
-      "id": "verify-test",
-      "note": "",
-      "added": "2026-10-11"
-    }
-  ]
+  "keys": []
 }
