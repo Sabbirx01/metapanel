@@ -64,16 +64,16 @@
       আপনার key টা ডেভেলপারের কাছে পাঠানো হয়েছে কি না নিশ্চিত করুন। অনুমতি পেলে এই পেজেই Download বাটন আসবে
       (key টা আবার বাসান)।
       <button id="req" style="margin-top:12px;background:linear-gradient(180deg,#3ddc6f,#22c55e)">
-        📩 অনুমতি চাই · Request access
+        📩 WhatsApp-এ অনুমতি চাই
       </button>
-      <div class="meta">এতে একটা request খুলবে — key নম্বরটা লেখা থাকবে।</div>
+      <div class="meta">আপনার key নিয়ে সরাসরি ডেভেলপারের WhatsApp খুলবে — message টা আগেই লেখা থাকবে।</div>
     </div>
 
     <div id="bad" class="box bad">
       <div style="font-weight:800">❌ এই key খুঁজে পাওয়া গেল না · key not recognised</div>
       <div class="meta">key ঠিক করে লিখুন, বা নিচের বাটন দিয়ে access চান।</div>
       <button id="req2" style="margin-top:12px;background:linear-gradient(180deg,#3ddc6f,#22c55e)">
-        📩 অনুমতি চাই · Request access
+        📩 WhatsApp-এ অনুমতি চাই
       </button>
     </div>
 
@@ -85,7 +85,8 @@
 const CFG = {
   owner: "Sabbirx01",
   repo:  "meta-exe",          // releases live here (public) — the same assets the app auto-updates from
-  requestRepo: "metapanel",      // where the "request access" issue is opened
+  site:  "metapanel",        // keys.json / release.json এই repo-তে
+  whatsapp: "8801410014442",    // admin-এর WhatsApp (international, country code সহ)      // where the "request access" issue is opened
 };
 const $ = id => document.getElementById(id);
 const show = (el, on) => el.classList.toggle("show", on);
@@ -126,7 +127,16 @@ async function check() {
   }
 
   const h = await hashKey(typed);
-  const me = (keys.keys || []).find(x => (x.hash || "").toLowerCase() === h);
+  let me = (keys.keys || []).find(x => (x.hash || "").toLowerCase() === h);
+  if (!me) {
+    // ⚠️ না পেলে একবার GitHub-কে সরাসরি জিজ্ঞেস করি: Pages build এখানে ৪৩-১৬৪ সেকেন্ড দেরি করে, আর
+    // ঠিক ওই দেরিটাই "key খুঁজে পাওয়া গেল না" দেখাত — যদিও key তখন repo-তে ছিল।
+    try {
+      const fresh = await freshKeys();
+      me = (fresh.keys || []).find(x => (x.hash || "").toLowerCase() === h);
+      if (me) say("info", "🔄 একটু আগেই approve হয়েছে — GitHub থেকে নতুন তালিকা নিয়ে দেখলাম।");
+    } catch (e) { /* fall through to "not recognised" */ }
+  }
 
   if (me && me.approved) {
     show($("dl"), true);
@@ -146,19 +156,22 @@ async function check() {
 }
 
 async function request() {
-  // The issue carries the HASH, which is the only thing the admin needs — and the only thing worth
-  // putting in a public issue: the key itself stays out of GitHub's history where it would be permanent.
+  // 📱 WHATSAPP (customer, 2026-10-11 16:0x). A GitHub issue needed a GitHub account and a manual copy of
+  // the hash; WhatsApp is one tap and the key is already in the message.
   const typed = $("k").value.trim();
-  const h = typed ? await hashKey(typed) : "";
-  const title = encodeURIComponent("Download access request — " + (typed.slice(0, 20) || "no key given"));
-  const body = encodeURIComponent(
-    "**Key:** `" + (typed || "(key টা লিখিনি)") + "`\n\n" +
-    "**SHA-256 hash:** `" + h + "`\n\n" +
-    "**কোথা থেকে:** download page\n" +
-    "**কখন:** " + new Date().toISOString() + "\n\n" +
-    "_Admin: `ADMIN.bat` খুলে এই hash টা **Add** করলেই key টা চালু হয়ে যাবে।_");
-  window.open(`https://github.com/${CFG.owner}/${CFG.requestRepo}/issues/new?title=${title}&body=${body}`,
-              "_blank");
+  const msg = "আসসালামু আলাইকুম — আমি Developer X প্যানেলের download access চাই।\n\n" +
+              "আমার key: " + (typed || "(লিখিনি)") + "\n\n" +
+              "(এই key টা admin panel-এ Add করে দিলে আমি download করতে পারব)";
+  window.open("https://wa.me/" + CFG.whatsapp + "?text=" + encodeURIComponent(msg), "_blank");
+}
+
+// 🔄 THE NEWEST LIST, STRAIGHT FROM GITHUB — bypasses the Pages build + CDN cache (see the note above).
+async function freshKeys() {
+  const r = await fetch("https://api.github.com/repos/" + CFG.owner + "/" + CFG.site +
+                        "/contents/keys.json?v=" + Date.now(),
+                        { headers: { "Accept": "application/vnd.github.raw" }, cache: "no-store" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return JSON.parse(await r.text());
 }
 
 $("go").onclick = check;
