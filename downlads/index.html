@@ -88,12 +88,15 @@ const CFG = {
   site:  "metapanel",        // keys.json / release.json এই repo-তে
   whatsapp: "8801410014442",    // admin-এর WhatsApp (international, country code সহ)      // where the "request access" issue is opened
   // 🔑 THE FIXED KEY (customer, 2026-10-12): *"DOWNLAOD_META_V2 LIKHLE DOWNLAD KORTE PARBE EVABE KORE
-  // DEU FIXED KEY"*. Typing this one word opens the download without appearing in keys.json at all.
-  // ⚠️ It is PUBLIC by construction — this is a static page, so anyone who opens devtools can read the
-  // string. That is accepted on purpose: it unlocks the DOWNLOAD of a zip that already sits in a public
-  // GitHub release, and the app's own licence check still runs on the customer's PC. It is a door, not
-  // a secret; per-person licences stay hashed in keys.json exactly as before.
-  masterKey: "DOWNLOAD_META_V2",
+  // DEU FIXED KEY"*. Typing this word opens the download without appearing in keys.json at all.
+  //
+  // ⚠️ BOTH SPELLINGS ARE ACCEPTED ON PURPOSE (customer's own screenshot, 2026-10-12 13:0x: the page
+  // rejected «key not recognised» while he was typing the fixed key). The typo is his, and it is the
+  // spelling he has been handing to customers — «DOWNLAOD» (LAOD) instead of «DOWNLOAD» (LOAD). Locking
+  // the door against the exact string people were given would just start a support thread; accepting
+  // the pair costs nothing, because this is a convenience door, not a secret (the page is static, so
+  // anyone can read the string in devtools anyway).
+  masterKeys: ["DOWNLOAD_META_V2", "DOWNLAOD_META_V2"],
 };
 const $ = id => document.getElementById(id);
 const show = (el, on) => el.classList.toggle("show", on);
@@ -127,7 +130,7 @@ async function check() {
 
   // 🔑 FIXED KEY FIRST — it short-circuits the hash lookup, and it also survives keys.json being
   // unreadable (a fixed key must not depend on a list it is not in).
-  const isMaster = typed.toUpperCase() === CFG.masterKey;
+  const isMaster = CFG.masterKeys.includes(typed.toUpperCase());
 
   let keys, rel;
   try {
