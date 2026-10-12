@@ -59,20 +59,10 @@
       <div class="meta">GitHub থেকেই নামবে — signature-যাচাই করা একই ফাইল যা auto-update-ও ব্যবহার করে।</div>
     </div>
 
-    <div id="pending" class="box warn">
-      <div style="font-weight:800;margin-bottom:6px">⏳ অনুমতির অপেক্ষায় · waiting for approval</div>
-      আপনার key টা ডেভেলপারের কাছে পাঠানো হয়েছে কি না নিশ্চিত করুন। অনুমতি পেলে এই পেজেই Download বাটন আসবে
-      (key টা আবার বাসান)।
-      <button id="req" style="margin-top:12px;background:linear-gradient(180deg,#3ddc6f,#22c55e)">
-        📩 WhatsApp-এ অনুমতি চাই
-      </button>
-      <div class="meta">আপনার key নিয়ে সরাসরি ডেভেলপারের WhatsApp খুলবে — message টা আগেই লেখা থাকবে।</div>
-    </div>
-
     <div id="bad" class="box bad">
-      <div style="font-weight:800">❌ এই key খুঁজে পাওয়া গেল না · key not recognised</div>
-      <div class="meta">key ঠিক করে লিখুন, বা নিচের বাটন দিয়ে access চান।</div>
-      <button id="req2" style="margin-top:12px;background:linear-gradient(180deg,#3ddc6f,#22c55e)">
+      <div style="font-weight:800">❌ এই key টা দিয়ে download হবে না · not allowed</div>
+      <div id="b-why" class="meta"></div>
+      <button id="req" style="margin-top:12px;background:linear-gradient(180deg,#3ddc6f,#22c55e)">
         📩 WhatsApp-এ অনুমতি চাই
       </button>
     </div>
@@ -82,34 +72,22 @@
 
 <script>
 // ── config ────────────────────────────────────────────────────────────────────────────────────
+// 🔑 THE OLD KEY LIST IS GONE (2026-10-13). This page used to carry, inside this very <script>, a
+// public list of SHA-256 hashes PLUS a hard-coded master key. Two consequences, both bad:
+//   1. a key issued in the admin panel did NOT open the download until somebody had also added its
+//      hash to that list by hand with ADMIN.bat — the owner: *"er jonno alada key lagbe na"*;
+//   2. the page is static, so anyone could read the master key straight out of the source and
+//      download for free, with no key at all.
+// Now the ONLY thing that decides is the licence server, and it reads the same table the admin panel
+// writes to. Issue a key -> it downloads. Block the key -> it stops downloading. There is no second
+// list anywhere, so the two can never drift apart again.
 const CFG = {
-  owner: "Sabbirx01",
-  repo:  "meta-exe",          // releases live here (public) — the same assets the app auto-updates from
-  site:  "metapanel",        // keys.json / release.json এই repo-তে
-  whatsapp: "8801410014442",    // admin-এর WhatsApp (international, country code সহ)      // where the "request access" issue is opened
-  // 🔑 THE FIXED KEY (customer, 2026-10-12): *"DOWNLAOD_META_V2 LIKHLE DOWNLAD KORTE PARBE EVABE KORE
-  // DEU FIXED KEY"*. Typing this word opens the download without appearing in keys.json at all.
-  //
-  // ⚠️ BOTH SPELLINGS ARE ACCEPTED ON PURPOSE (customer's own screenshot, 2026-10-12 13:0x: the page
-  // rejected «key not recognised» while he was typing the fixed key). The typo is his, and it is the
-  // spelling he has been handing to customers — «DOWNLAOD» (LAOD) instead of «DOWNLOAD» (LOAD). Locking
-  // the door against the exact string people were given would just start a support thread; accepting
-  // the pair costs nothing, because this is a convenience door, not a secret (the page is static, so
-  // anyone can read the string in devtools anyway).
-  masterKeys: ["DOWNLOAD_META_V2", "DOWNLAOD_META_V2"],
+  api: "/metapanel/release.json",                                   // version / file / sha256
+  licenseApi: "https://license.automationservice.online/api/download.php",
+  whatsapp: "8801410014442",     // admin-এর WhatsApp (international, country code সহ)
 };
 const $ = id => document.getElementById(id);
 const show = (el, on) => el.classList.toggle("show", on);
-
-// ── key handling ──────────────────────────────────────────────────────────────────────────────
-// The published list holds only SHA-256 HASHES of the keys, never the keys themselves — this page is
-// public, so a list of plain keys would be a list of everybody's licence. Same normalisation on both
-// sides: trim + uppercase (the keys this tool ships are uppercase), hashed as UTF-8.
-async function hashKey(k) {
-  const data = new TextEncoder().encode(k.trim().toUpperCase());
-  const buf = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
 
 async function getJSON(name) {
   const r = await fetch(name + "?v=" + Date.now(), {cache: "no-store"});
@@ -123,80 +101,89 @@ function say(kind, html) {
   el.innerHTML = html;
 }
 
+// ── does the licence server know this key? ────────────────────────────────────────────────────
+// ⚠️ THE ONE ANSWER THIS PAGE TRUSTS. It is a cross-origin POST, and the endpoint answers the
+// browser's preflight itself (OPTIONS 204 + Access-Control-Allow-Origin), so nothing else is needed
+// here. An unreachable server is reported as exactly that — never as "key not recognised", because
+// telling a paying customer his key is bad when the network is down is how a support thread starts.
+async function ask(key) {
+  const r = await fetch(CFG.licenseApi, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({license_key: key}),
+    cache: "no-store",
+  });
+  const text = await r.text();
+  let data;
+  try { data = JSON.parse(text); }
+  catch (e) { throw new Error("server answered " + r.status + " — " + text.slice(0, 120)); }
+  if (r.status >= 400) { throw new Error("server answered HTTP " + r.status); }
+  return data;
+}
+
 async function check() {
   const typed = $("k").value.trim();
-  show($("dl"), false); show($("pending"), false); show($("bad"), false); show($("msg"), false);
+  show($("dl"), false); show($("bad"), false); show($("msg"), false);
   if (typed.length < 4) { say("warn", "key টা পুরো লিখুন · enter your full key"); return; }
 
-  // 🔑 FIXED KEY FIRST — it short-circuits the hash lookup, and it also survives keys.json being
-  // unreadable (a fixed key must not depend on a list it is not in).
-  const isMaster = CFG.masterKeys.includes(typed.toUpperCase());
-
-  let keys, rel;
+  $("go").disabled = true;
+  $("go").textContent = "⏳ দেখা হচ্ছে…";
   try {
-    [keys, rel] = await Promise.all([
-      isMaster ? Promise.resolve({ keys: [] }) : getJSON("/metapanel/keys.json"),
-      getJSON("/metapanel/release.json"),
+    const [verdict, rel] = await Promise.all([
+      ask(typed),
+      getJSON(CFG.api).catch(() => null),
     ]);
-  } catch (e) {
-    say("bad", "ফাইল লোড করা গেল না · could not load the list<br><code>" + e.message + "</code>");
-    return;
-  }
 
-  const h = await hashKey(typed);
-  let me = isMaster ? { approved: true, name: "Fixed Key", master: true }
-                    : (keys.keys || []).find(x => (x.hash || "").toLowerCase() === h);
-  if (!me) {
-    // ⚠️ না পেলে একবার GitHub-কে সরাসরি জিজ্ঞেস করি: Pages build এখানে ৪৩-১৬৪ সেকেন্ড দেরি করে, আর
-    // ঠিক ওই দেরিটাই "key খুঁজে পাওয়া গেল না" দেখাত — যদিও key তখন repo-তে ছিল।
-    try {
-      const fresh = await freshKeys();
-      me = (fresh.keys || []).find(x => (x.hash || "").toLowerCase() === h);
-      if (me) say("info", "🔄 একটু আগেই approve হয়েছে — GitHub থেকে নতুন তালিকা নিয়ে দেখলাম।");
-    } catch (e) { /* fall through to "not recognised" */ }
-  }
+    if (!verdict.valid) {
+      // The server owns the wording, so a blocked key, an expired key and a typo all explain
+      // themselves in the customer's own language.
+      $("b-why").textContent = verdict.message || "";
+      show($("bad"), true);
+      return;
+    }
+    if (!rel) {
+      say("warn", "আপনার key ঠিক আছে ✅ — কিন্তু build-এর তথ্য লোড করা গেল না। "
+                + "একবার আবার চেষ্টা করুন।");
+      return;
+    }
 
-  if (me && me.approved) {
     show($("dl"), true);
     $("d-ver").textContent  = rel.version || "—";
     $("d-file").textContent = rel.asset || "—";
     $("d-size").textContent = rel.size_mb ? rel.size_mb + " MB" : "—";
     $("d-sha").textContent  = (rel.sha256 || "—").slice(0, 24) + "…";
     $("dlbtn").onclick = () => { window.location.href = rel.url; };
-    if (me.master) say("good", "🔑 Fixed key ঠিক আছে — নিচের Download বাটন চাপুন ⬇️");
-    else if (me.name) say("good", "স্বাগতম, <b>" + me.name + "</b> — স্বাগতম!");
-    return;
+
+    const bits = [];
+    if (verdict.customer) bits.push("স্বাগতম, <b>" + verdict.customer + "</b>");
+    else bits.push("🔑 key ঠিক আছে");
+    if (verdict.plan) bits.push("plan: " + verdict.plan);
+    if (verdict.days_remaining !== undefined && verdict.days_remaining !== 9999)
+      bits.push("বাকি " + verdict.days_remaining + " দিন");
+    else if (verdict.license_type === "lifetime") bits.push("lifetime");
+    say("good", bits.join(" · ") + " — নিচের Download বাটন চাপুন ⬇️");
+  } catch (e) {
+    say("info", "licence server-এ পৌঁছানো গেল না · could not reach the licence server<br>"
+              + "<code>" + e.message + "</code><br>ইন্টারনেট চেক করে আবার চাপুন।");
+  } finally {
+    $("go").disabled = false;
+    $("go").textContent = "🔓 লগইন / Login";
   }
-  if (me) {
-    show($("pending"), true);
-    return;
-  }
-  show($("bad"), true);
 }
 
-async function request() {
-  // 📱 WHATSAPP (customer, 2026-10-11 16:0x). A GitHub issue needed a GitHub account and a manual copy of
-  // the hash; WhatsApp is one tap and the key is already in the message.
+function request() {
+  // 📱 WHATSAPP (customer, 2026-10-11 16:0x). A GitHub issue needed a GitHub account and a manual copy
+  // of the hash; WhatsApp is one tap and the key is already in the message.
   const typed = $("k").value.trim();
   const msg = "আসসালামু আলাইকুম — আমি Developer X প্যানেলের download access চাই।\n\n" +
               "আমার key: " + (typed || "(লিখিনি)") + "\n\n" +
-              "(এই key টা admin panel-এ Add করে দিলে আমি download করতে পারব)";
+              "(এই key টা admin panel-এ issue করলে আমি download করতে পারব)";
   window.open("https://wa.me/" + CFG.whatsapp + "?text=" + encodeURIComponent(msg), "_blank");
-}
-
-// 🔄 THE NEWEST LIST, STRAIGHT FROM GITHUB — bypasses the Pages build + CDN cache (see the note above).
-async function freshKeys() {
-  const r = await fetch("https://api.github.com/repos/" + CFG.owner + "/" + CFG.site +
-                        "/contents/keys.json?v=" + Date.now(),
-                        { headers: { "Accept": "application/vnd.github.raw" }, cache: "no-store" });
-  if (!r.ok) throw new Error("HTTP " + r.status);
-  return JSON.parse(await r.text());
 }
 
 $("go").onclick = check;
 $("k").addEventListener("keydown", e => { if (e.key === "Enter") check(); });
 $("req").onclick = request;
-$("req2").onclick = request;
 </script>
 </body>
 </html>
