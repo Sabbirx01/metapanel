@@ -87,6 +87,13 @@ const CFG = {
   repo:  "meta-exe",          // releases live here (public) — the same assets the app auto-updates from
   site:  "metapanel",        // keys.json / release.json এই repo-তে
   whatsapp: "8801410014442",    // admin-এর WhatsApp (international, country code সহ)      // where the "request access" issue is opened
+  // 🔑 THE FIXED KEY (customer, 2026-10-12): *"DOWNLAOD_META_V2 LIKHLE DOWNLAD KORTE PARBE EVABE KORE
+  // DEU FIXED KEY"*. Typing this one word opens the download without appearing in keys.json at all.
+  // ⚠️ It is PUBLIC by construction — this is a static page, so anyone who opens devtools can read the
+  // string. That is accepted on purpose: it unlocks the DOWNLOAD of a zip that already sits in a public
+  // GitHub release, and the app's own licence check still runs on the customer's PC. It is a door, not
+  // a secret; per-person licences stay hashed in keys.json exactly as before.
+  masterKey: "DOWNLOAD_META_V2",
 };
 const $ = id => document.getElementById(id);
 const show = (el, on) => el.classList.toggle("show", on);
@@ -118,16 +125,24 @@ async function check() {
   show($("dl"), false); show($("pending"), false); show($("bad"), false); show($("msg"), false);
   if (typed.length < 4) { say("warn", "key টা পুরো লিখুন · enter your full key"); return; }
 
+  // 🔑 FIXED KEY FIRST — it short-circuits the hash lookup, and it also survives keys.json being
+  // unreadable (a fixed key must not depend on a list it is not in).
+  const isMaster = typed.toUpperCase() === CFG.masterKey;
+
   let keys, rel;
   try {
-    [keys, rel] = await Promise.all([getJSON("/metapanel/keys.json"), getJSON("/metapanel/release.json")]);
+    [keys, rel] = await Promise.all([
+      isMaster ? Promise.resolve({ keys: [] }) : getJSON("/metapanel/keys.json"),
+      getJSON("/metapanel/release.json"),
+    ]);
   } catch (e) {
     say("bad", "ফাইল লোড করা গেল না · could not load the list<br><code>" + e.message + "</code>");
     return;
   }
 
   const h = await hashKey(typed);
-  let me = (keys.keys || []).find(x => (x.hash || "").toLowerCase() === h);
+  let me = isMaster ? { approved: true, name: "Fixed Key", master: true }
+                    : (keys.keys || []).find(x => (x.hash || "").toLowerCase() === h);
   if (!me) {
     // ⚠️ না পেলে একবার GitHub-কে সরাসরি জিজ্ঞেস করি: Pages build এখানে ৪৩-১৬৪ সেকেন্ড দেরি করে, আর
     // ঠিক ওই দেরিটাই "key খুঁজে পাওয়া গেল না" দেখাত — যদিও key তখন repo-তে ছিল।
@@ -145,7 +160,8 @@ async function check() {
     $("d-size").textContent = rel.size_mb ? rel.size_mb + " MB" : "—";
     $("d-sha").textContent  = (rel.sha256 || "—").slice(0, 24) + "…";
     $("dlbtn").onclick = () => { window.location.href = rel.url; };
-    if (me.name) say("good", "স্বাগতম, <b>" + me.name + "</b> — স্বাগতম!");
+    if (me.master) say("good", "🔑 Fixed key ঠিক আছে — নিচের Download বাটন চাপুন ⬇️");
+    else if (me.name) say("good", "স্বাগতম, <b>" + me.name + "</b> — স্বাগতম!");
     return;
   }
   if (me) {
