@@ -1,9 +1,9 @@
 {
-  "version": "1.3.6",
-  "asset": "Meta_EXE-exe-1.3.6.zip",
+  "version": "1.3.7",
+  "asset": "Meta_EXE-exe-1.3.7.zip",
   "size_mb": 318.0,
-  "url": "https://github.com/Sabbirx01/meta-exe/releases/download/v1.3.6/Meta_EXE-exe-1.3.6.zip",
-  "published": "2026-10-13T05:46:31Z",
+  "url": "https://github.com/Sabbirx01/meta-exe/releases/download/v1.3.7/Meta_EXE-exe-1.3.7.zip",
+  "published": "2026-10-13T05:59:05Z",
   "note": "একই signed ফাইল যা app-এর auto-update ব্যবহার করে",
-  "sha256": "4bd7b49b98f4b805d03ac4f4daa4a1b41df9817af3739d8a2156e007f024e9eb"
+  "sha256": "8c63e9fd7789f7b35d619a81bb00c5dc077df07de862c2e8160c7af970696fd9"
 }
