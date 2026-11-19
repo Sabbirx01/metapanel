@@ -85,6 +85,13 @@ const CFG = {
   api: "/metapanel/release.json",                                   // version / file / sha256
   licenseApi: "https://license.automationservice.online/api/download.php",
   whatsapp: "8801410014442",     // admin-এর WhatsApp (international, country code সহ)
+  // ২০২৬-১১-১৯ (Owner): licence server একই সাথে কয়েকটা product-এর key ধরে —
+  // metav2 (এই প্যানেল), meta, minimax। আগে যেকোনো বৈধ key দিয়েই এই পেজ download
+  // দিয়ে দিত (MiniMax-এর customer-ও Meta panel নামিয়ে নিয়েছে)। এখন শুধু এই
+  // product-এর key-ই চলবে; prefix আর server-এর `product` — দুটোই মিলতে হবে।
+  product: "metav2",
+  prefix: "METAV2-",
+  toolNames: {metav2: "Meta V2", meta: "Meta", minimax: "MiniMax"},
 };
 const $ = id => document.getElementById(id);
 const show = (el, on) => el.classList.toggle("show", on);
@@ -121,10 +128,24 @@ async function ask(key) {
   return data;
 }
 
+function wrongTool(product) {
+  const name = CFG.toolNames[String(product || "").toLowerCase()] || "অন্য";
+  $("b-why").innerHTML = "এই key টা <b>" + name + "</b> টুলের — এখানে শুধু "
+    + "<b>Meta</b> প্যানেলের key (<code>METAV2-</code> দিয়ে শুরু) দিয়েই download হবে।";
+  show($("bad"), true);
+}
+
 async function check() {
-  const typed = $("k").value.trim();
+  const typed = $("k").value.trim().toUpperCase();
   show($("dl"), false); show($("bad"), false); show($("msg"), false);
   if (typed.length < 4) { say("warn", "key টা পুরো লিখুন · enter your full key"); return; }
+
+  // server-এ যাওয়ার আগেই ভুল tool-এর key ধরা পড়ে — এক নেটওয়ার্ক রাউন্ডটাও লাগে না।
+  if (CFG.prefix && !typed.startsWith(CFG.prefix)) {
+    const p = typed.split("-")[0].toLowerCase();
+    wrongTool(p === CFG.product ? "" : p);
+    return;
+  }
 
   $("go").disabled = true;
   $("go").textContent = "⏳ দেখা হচ্ছে…";
@@ -133,6 +154,13 @@ async function check() {
       ask(typed),
       getJSON(CFG.api).catch(() => null),
     ]);
+
+    // prefix ঠিক থাকলেও server-ই শেষ কথা: product মিলছে না মানে অন্য টুলের key।
+    const prod = String(verdict.product || "").toLowerCase();
+    if (verdict.valid && CFG.product && prod && prod !== CFG.product) {
+      wrongTool(prod);
+      return;
+    }
 
     if (!verdict.valid) {
       // The server owns the wording, so a blocked key, an expired key and a typo all explain
@@ -156,7 +184,7 @@ async function check() {
 
     const bits = [];
     if (verdict.customer) bits.push("স্বাগতম, <b>" + verdict.customer + "</b>");
-    else bits.push("🔑 key ঠিক আছে");
+    else bits.push("🔑 key ঠিক আছে · Meta প্যানেল");
     if (verdict.plan) bits.push("plan: " + verdict.plan);
     // ২০২৬-১১-১৯: lifetime key-তে server `days_remaining: null` পাঠায় — তখন
     // পেজে «বাকি null দিন» ছাপা হচ্ছিল। null/undefined/9999 — তিনটাই বাদ।
