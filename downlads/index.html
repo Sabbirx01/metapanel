@@ -158,7 +158,9 @@ async function check() {
     if (verdict.customer) bits.push("স্বাগতম, <b>" + verdict.customer + "</b>");
     else bits.push("🔑 key ঠিক আছে");
     if (verdict.plan) bits.push("plan: " + verdict.plan);
-    if (verdict.days_remaining !== undefined && verdict.days_remaining !== 9999)
+    // ২০২৬-১১-১৯: lifetime key-তে server `days_remaining: null` পাঠায় — তখন
+    // পেজে «বাকি null দিন» ছাপা হচ্ছিল। null/undefined/9999 — তিনটাই বাদ।
+    if (verdict.days_remaining != null && verdict.days_remaining !== 9999)
       bits.push("বাকি " + verdict.days_remaining + " দিন");
     else if (verdict.license_type === "lifetime") bits.push("lifetime");
     say("good", bits.join(" · ") + " — নিচের Download বাটন চাপুন ⬇️");
